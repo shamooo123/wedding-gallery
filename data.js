@@ -5,13 +5,15 @@ const weddingEvents = [
         title: "The Nikah",
         date: "January 10, 2024",
         description: "The beginning of their forever. The engagement and signing ceremony.",
-        // PASTE YOUR YOUTUBE EMBED LINKS HERE
+        // Paste the Google Drive "Share" link here
         videos: [
-            { label: "Cinematic Trailer", url: "https://www.youtube.com/embed/dQw4w9WgXcQ" }, 
-            { label: "Full Ceremony", url: "https://www.youtube.com/embed/dQw4w9WgXcQ" }
+            { label: "Cinematic Trailer", url: "https://drive.google.com/file/d/YOUR_VIDEO_ID/view?usp=sharing" }, 
+            { label: "Full Ceremony (4K)", url: "https://drive.google.com/file/d/YOUR_VIDEO_ID/view?usp=sharing" }
         ],
-        // PASTE YOUR PHOTO FILENAMES HERE (Must match exactly what you uploaded)
-        photos: [] 
+        // Upload 5-10 highlight photos to GitHub and list them here
+        photos: [], 
+        // Paste the link to the Google Drive FOLDER containing all Nikah photos
+        fullAlbumLink: "https://drive.google.com/drive/folders/YOUR_NIKAH_FOLDER_ID?usp=sharing"
     },
     {
         id: "mehndi",
@@ -19,13 +21,13 @@ const weddingEvents = [
         date: "January 12, 2024",
         description: "A night of colors, dance, and celebration.",
         videos: [
-            { label: "Mehndi Highlights", url: "https://www.youtube.com/embed/dQw4w9WgXcQ" }
+            { label: "Mehndi Highlights", url: "https://drive.google.com/file/d/YOUR_VIDEO_ID/view?usp=sharing" }
         ],
         photos: [
             "mehndi1.jpg", 
-            "mehndi2.jpg",
-            "mehndi3.jpg"
-        ]
+            "mehndi2.jpg"
+        ],
+        fullAlbumLink: "https://drive.google.com/drive/folders/YOUR_MEHNDI_FOLDER_ID?usp=sharing"
     },
     {
         id: "shaadi",
@@ -36,6 +38,7 @@ const weddingEvents = [
         photos: [
             "shaadi1.jpg",
             "shaadi2.jpg"
-        ]
+        ],
+        fullAlbumLink: "https://drive.google.com/drive/folders/YOUR_SHAADI_FOLDER_ID?usp=sharing"
     }
 ];
