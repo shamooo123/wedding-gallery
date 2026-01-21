@@ -3,34 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonia & Ali - Wedding Celebration</title>
+    <title>Sara & Shan - Wedding Celebration</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        serif: ['Georgia', 'serif'],
-                        sans: ['Helvetica', 'Arial', 'sans-serif'],
+                        serif: ['Playfair Display', 'Georgia', 'serif'],
+                        sans: ['Lato', 'Helvetica', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 </head>
-<body class="bg-stone-50 text-stone-800">
+<body class="bg-[#FDFCF8] text-stone-800">
 
-    <header class="h-[60vh] flex flex-col items-center justify-center bg-stone-900 text-white text-center px-4">
-        <h1 class="text-5xl md:text-7xl font-serif mb-4">Sonia & Ali</h1>
-        <p class="text-lg md:text-xl font-light tracking-widest uppercase opacity-80">The Wedding Celebration</p>
-        <nav id="nav-links" class="mt-8 flex gap-6 text-sm text-stone-400"></nav>
+    <header class="min-h-[70vh] flex flex-col items-center justify-center bg-stone-900 text-white text-center px-4 relative overflow-hidden">
+        <div class="z-10 relative">
+            <p class="text-sm md:text-base font-light tracking-[0.3em] uppercase opacity-80 mb-6">The Wedding Of</p>
+            <h1 class="text-4xl md:text-7xl font-serif mb-6 italic">Sara Shehnaz Abbasi<br><span class="text-2xl md:text-4xl not-italic text-stone-400">&</span><br>Muhammed Shan Ahmed</h1>
+            <nav id="nav-links" class="mt-12 flex flex-wrap justify-center gap-6 text-sm md:text-base text-stone-300"></nav>
+        </div>
+        <div class="absolute inset-0 bg-black opacity-20"></div>
     </header>
 
-    <main id="events-container" class="max-w-5xl mx-auto px-4 py-8 space-y-12">
+    <main id="events-container" class="max-w-6xl mx-auto px-4 py-8 space-y-12">
         </main>
 
-    <footer class="bg-stone-900 text-stone-500 py-12 text-center text-sm mt-12">
-        <p>A gift for my sister ❤️</p>
+    <footer class="bg-stone-900 text-stone-500 py-16 text-center text-sm mt-12">
+        <p class="tracking-widest uppercase text-xs">A gift for my sister</p>
+        <p class="mt-2 opacity-50">© 2024</p>
     </footer>
 
     <script src="data.js"></script>
