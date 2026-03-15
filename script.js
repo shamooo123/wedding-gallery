@@ -1,108 +1,377 @@
-// script.js
-document.addEventListener('DOMContentLoaded', () => {
-    const container = document.getElementById('events-container');
-    const navContainer = document.getElementById('nav-links');
+// ════════════════════════════════════════════════════
+//  SARA & SHAN — script.js
+// ════════════════════════════════════════════════════
 
-    // Helper to convert Drive Share Link to Embed Link
-    const getDriveEmbed = (link) => {
-        // Extracts the ID and adds /preview
-        const idMatch = link.match(/\/d\/(.+?)\//);
-        if (idMatch && idMatch[1]) {
-            return `https://drive.google.com/file/d/${idMatch[1]}/preview`;
-        }
-        return link; 
-    };
+(function () {
+    'use strict';
 
-    weddingEvents.forEach((event, index) => {
-        // 1. Build Navigation
-        const navLink = document.createElement('a');
-        navLink.href = `#${event.id}`;
-        navLink.className = "hover:text-stone-900 transition-colors";
-        navLink.innerText = event.title;
-        navContainer.appendChild(navLink);
+    // ── VIDEO URL HELPERS ────────────────────────────
 
-        // 2. Build Section
-        const section = document.createElement('section');
-        section.id = event.id;
-        section.className = "py-16 scroll-mt-20 border-b border-stone-200 last:border-0";
+    /**
+     * Detects video type and returns { type, embedUrl, thumbUrl }
+     */
+    function parseVideoUrl(rawUrl) {
+        if (!rawUrl || rawUrl.includes('PASTE_YOUR_URL')) return null;
 
-        // Handle Videos (Google Drive Friendly)
-        let videosHTML = '';
-        if (event.videos.length > 0) {
-            const videoCards = event.videos.map(vid => `
-                <div class="bg-black rounded-lg overflow-hidden shadow-lg mb-6">
-                    <div class="relative pb-[56.25%] h-0">
-                        <iframe 
-                            src="${getDriveEmbed(vid.url)}" 
-                            class="absolute top-0 left-0 w-full h-full" 
-                            style="border:0"
-                            allowfullscreen>
-                        </iframe>
-                    </div>
-                    <div class="p-4 bg-white border-t border-stone-100">
-                        <p class="font-bold text-stone-800 flex items-center gap-2">
-                           ▶ ${vid.label}
-                        </p>
-                    </div>
-                </div>
-            `).join('');
-            
-            videosHTML = `
-                <div class="mb-12">
-                    <h3 class="text-2xl font-serif mb-6 text-stone-800">Films</h3>
-                    <div class="grid gap-8 md:grid-cols-2">
-                        ${videoCards}
-                    </div>
-                </div>
-            `;
+        // YouTube
+        const ytMatch = rawUrl.match(
+            /(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/
+        );
+        if (ytMatch) {
+            return {
+                type: 'iframe',
+                embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&rel=0`,
+                thumbUrl: `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg`
+            };
         }
 
-        // Handle Photos & Full Album Link
-        let photosHTML = '';
-        let albumButtonHTML = '';
-
-        if (event.fullAlbumLink) {
-            albumButtonHTML = `
-                <div class="mt-8 text-center">
-                    <a href="${event.fullAlbumLink}" target="_blank" rel="noopener noreferrer" 
-                       class="inline-flex items-center gap-2 px-8 py-3 bg-stone-900 text-white rounded-full hover:bg-stone-700 transition shadow-lg text-sm font-semibold tracking-wider uppercase">
-                       View All Photos on Google Drive ↗
-                    </a>
-                </div>
-            `;
+        // Vimeo
+        const vimeoMatch = rawUrl.match(/vimeo\.com\/(\d+)/);
+        if (vimeoMatch) {
+            return {
+                type: 'iframe',
+                embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`,
+                thumbUrl: null  // fetched async below if needed
+            };
         }
 
-        if (event.photos.length > 0) {
-            const photoCards = event.photos.map(photo => `
-                <div class="group relative overflow-hidden rounded-lg shadow-md aspect-[3/4] bg-stone-200">
-                    <img src="${photo}" alt="Wedding highlight" class="object-cover w-full h-full transform transition duration-700 group-hover:scale-105" loading="lazy">
-                </div>
-            `).join('');
-
-            photosHTML = `
-                <div>
-                    <h3 class="text-2xl font-serif mb-6 text-stone-800">Highlights Gallery</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        ${photoCards}
-                    </div>
-                    ${albumButtonHTML}
-                </div>
-            `;
-        } else if (event.fullAlbumLink) {
-             // If no highlight photos, just show the button
-             photosHTML = `<div class="mt-8">${albumButtonHTML}</div>`;
+        // Google Drive
+        const driveMatch = rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (driveMatch) {
+            return {
+                type: 'iframe',
+                embedUrl: `https://drive.google.com/file/d/${driveMatch[1]}/preview`,
+                thumbUrl: null
+            };
         }
 
-        section.innerHTML = `
-            <div class="text-center mb-16">
-                <span class="text-stone-500 uppercase tracking-widest text-xs font-bold border-b border-stone-300 pb-1">${event.date}</span>
-                <h2 class="text-4xl md:text-6xl font-serif mt-6 mb-4 text-stone-800">${event.title}</h2>
-                <p class="text-stone-600 max-w-xl mx-auto leading-relaxed">${event.description}</p>
-            </div>
-            ${videosHTML}
-            ${photosHTML}
-        `;
+        // Direct MP4 / video file
+        if (/\.(mp4|webm|mov|m4v)(\?|$)/i.test(rawUrl)) {
+            return { type: 'video', embedUrl: rawUrl, thumbUrl: null };
+        }
 
-        container.appendChild(section);
+        // Unknown — try as iframe
+        return { type: 'iframe', embedUrl: rawUrl, thumbUrl: null };
+    }
+
+    // ── VIDEO MODAL ──────────────────────────────────
+
+    const videoModal    = document.getElementById('video-modal');
+    const videoBackdrop = document.getElementById('video-backdrop');
+    const vmIframe      = document.getElementById('vm-iframe');
+    const vmVideo       = document.getElementById('vm-video');
+    const vmLabel       = document.getElementById('vm-label');
+    const vmClose       = document.getElementById('vm-close');
+
+    function openVideo(parsed, label) {
+        if (!parsed) return;
+
+        vmIframe.style.display = 'none';
+        vmVideo.style.display  = 'none';
+        vmIframe.src = '';
+        vmVideo.src  = '';
+
+        if (parsed.type === 'video') {
+            vmVideo.src = parsed.embedUrl;
+            vmVideo.style.display = 'block';
+        } else {
+            vmIframe.src = parsed.embedUrl;
+            vmIframe.style.display = 'block';
+        }
+
+        vmLabel.textContent = label || '';
+        videoModal.classList.add('active');
+        videoModal.setAttribute('aria-hidden', 'false');
+
+        // Backdrop fade-in
+        videoBackdrop.style.display = 'block';
+        requestAnimationFrame(() => videoBackdrop.classList.add('active'));
+
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeVideo() {
+        videoModal.classList.remove('active');
+        videoModal.setAttribute('aria-hidden', 'true');
+        videoBackdrop.classList.remove('active');
+        setTimeout(() => { videoBackdrop.style.display = 'none'; }, 350);
+        vmIframe.src = '';
+        vmVideo.pause?.();
+        vmVideo.src = '';
+        document.body.style.overflow = '';
+    }
+
+    vmClose.addEventListener('click', closeVideo);
+    videoBackdrop.addEventListener('click', closeVideo);
+
+    // ── LIGHTBOX ─────────────────────────────────────
+
+    const lightbox  = document.getElementById('lightbox');
+    const lbBdrop   = document.getElementById('lightbox-backdrop');
+    const lbImg     = document.getElementById('lb-img');
+    const lbCaption = document.getElementById('lb-caption');
+    const lbCounter = document.getElementById('lb-counter');
+    const lbClose   = document.getElementById('lb-close');
+    const lbPrev    = document.getElementById('lb-prev');
+    const lbNext    = document.getElementById('lb-next');
+
+    let lbPhotos = [];  // flat array of { src, caption }
+    let lbIndex  = 0;
+
+    function openLightbox(photos, startIndex) {
+        lbPhotos = photos;
+        showLbPhoto(startIndex);
+
+        lightbox.classList.add('active');
+        lightbox.setAttribute('aria-hidden', 'false');
+        lbBdrop.style.display = 'block';
+        requestAnimationFrame(() => lbBdrop.classList.add('active'));
+        document.body.style.overflow = 'hidden';
+    }
+
+    function showLbPhoto(index) {
+        lbIndex = (index + lbPhotos.length) % lbPhotos.length;
+        const p = lbPhotos[lbIndex];
+        lbImg.src       = p.src;
+        lbImg.alt       = p.caption || 'Wedding photo';
+        lbCaption.textContent = p.caption || '';
+        lbCounter.textContent = `${lbIndex + 1} / ${lbPhotos.length}`;
+
+        // Hide arrows if only one photo
+        lbPrev.style.display = lbPhotos.length > 1 ? '' : 'none';
+        lbNext.style.display = lbPhotos.length > 1 ? '' : 'none';
+    }
+
+    function closeLightbox() {
+        lightbox.classList.remove('active');
+        lightbox.setAttribute('aria-hidden', 'true');
+        lbBdrop.classList.remove('active');
+        setTimeout(() => { lbBdrop.style.display = 'none'; }, 350);
+        document.body.style.overflow = '';
+    }
+
+    lbClose.addEventListener('click', closeLightbox);
+    lbBdrop.addEventListener('click', closeLightbox);
+    lbPrev.addEventListener('click', () => showLbPhoto(lbIndex - 1));
+    lbNext.addEventListener('click', () => showLbPhoto(lbIndex + 1));
+
+    // Keyboard nav
+    document.addEventListener('keydown', e => {
+        if (lightbox.classList.contains('active')) {
+            if (e.key === 'ArrowLeft')  showLbPhoto(lbIndex - 1);
+            if (e.key === 'ArrowRight') showLbPhoto(lbIndex + 1);
+            if (e.key === 'Escape')     closeLightbox();
+        }
+        if (videoModal.classList.contains('active')) {
+            if (e.key === 'Escape') closeVideo();
+        }
     });
-});
+
+    // Touch swipe for lightbox
+    let touchStartX = 0;
+    lightbox.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+    lightbox.addEventListener('touchend',   e => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        if (Math.abs(dx) > 50) showLbPhoto(lbIndex + (dx < 0 ? 1 : -1));
+    });
+
+    // ── NAV SCROLL EFFECT ────────────────────────────
+
+    const nav = document.getElementById('site-nav');
+    window.addEventListener('scroll', () => {
+        nav.classList.toggle('scrolled', window.scrollY > 60);
+    }, { passive: true });
+
+    // ── SCROLL REVEAL ────────────────────────────────
+
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.07 });
+
+    // ── BUILD PAGE ───────────────────────────────────
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const { couple, events } = weddingData;
+        const navLinks = document.getElementById('nav-links');
+        const eventsEl = document.getElementById('events');
+
+        // Update hero names
+        document.querySelector('.hero-title').innerHTML =
+            `<em>${couple.name1}</em>
+             <span class="hero-amp">&amp;</span>
+             <em>${couple.name2}</em>`;
+        document.querySelector('.hero-date').textContent =
+            events[0]?.date.split(' ').slice(-1)[0] + ' – ' +
+            events[events.length-1]?.date || couple.year;
+
+        // Track all photos across events for global lightbox
+        const allPhotos = {};
+
+        events.forEach((event, eIdx) => {
+            // Nav link
+            const li = document.createElement('li');
+            const a  = document.createElement('a');
+            a.href        = `#${event.id}`;
+            a.textContent = event.title;
+            li.appendChild(a);
+            navLinks.appendChild(li);
+
+            // Build valid videos
+            const validVideos = (event.videos || [])
+                .map(v => ({ ...v, parsed: parseVideoUrl(v.url) }))
+                .filter(v => v.parsed);
+
+            // Build valid photos
+            const validPhotos = (event.photos || []).filter(p => p && !p.includes('your-github'));
+
+            // Store for lightbox
+            allPhotos[event.id] = validPhotos.map(p => ({ src: p, caption: event.title }));
+
+            // ── Section HTML ─────────────────────────
+            const section = document.createElement('section');
+            section.className = 'event-section';
+            section.id        = event.id;
+            section.style.cssText = `transition-delay: ${eIdx * 0.08}s`;
+
+            // Films
+            let filmsHTML = '';
+            if (validVideos.length > 0) {
+                const cards = validVideos.map((v, i) => {
+                    const thumb = v.parsed.thumbUrl;
+                    const thumbContent = thumb
+                        ? `<div class="film-thumb-img-wrap" style="position:absolute;inset:0">
+                              <img src="${thumb}" alt="${v.label}" loading="lazy" 
+                                   onerror="this.parentElement.parentElement.querySelector('.film-thumb-placeholder').style.display='flex';this.parentElement.remove()">
+                           </div>`
+                        : '';
+                    return `
+                        <div class="film-card" 
+                             data-event="${event.id}"
+                             data-vidx="${i}"
+                             role="button" tabindex="0"
+                             aria-label="Play ${v.label}">
+                          <div class="film-thumb">
+                            <div class="film-thumb-placeholder">
+                              <div class="film-play-icon">▶</div>
+                            </div>
+                            ${thumbContent}
+                          </div>
+                          <div class="film-info">
+                            <p class="film-label">${v.label}</p>
+                          </div>
+                        </div>`;
+                }).join('');
+
+                filmsHTML = `
+                    <div class="films-block">
+                        <h3 class="section-heading">Films</h3>
+                        <div class="films-grid">${cards}</div>
+                    </div>`;
+            } else {
+                filmsHTML = `
+                    <div class="films-block">
+                        <h3 class="section-heading">Films</h3>
+                        <div class="empty-state">
+                            Videos will appear here once added to data.js
+                        </div>
+                    </div>`;
+            }
+
+            // Photos
+            let photosHTML = '';
+            let albumBtnHTML = event.albumLink
+                ? `<div class="album-btn-wrap">
+                       <a href="${event.albumLink}" target="_blank" rel="noopener" class="album-btn">
+                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                               <path d="M4 16l4-4 4 4 4-8 4 8M3 3h18v14a2 2 0 01-2 2H5a2 2 0 01-2-2V3z"/>
+                           </svg>
+                           View Full Album
+                       </a>
+                   </div>` : '';
+
+            if (validPhotos.length > 0) {
+                const photoItems = validPhotos.map((p, i) => `
+                    <div class="photo-item" 
+                         data-event="${event.id}"
+                         data-pidx="${i}"
+                         role="button" tabindex="0"
+                         aria-label="Open photo ${i + 1}">
+                        <img src="${p}" alt="Wedding photo ${i+1}" loading="lazy"
+                             onerror="this.closest('.photo-item').querySelector('.photo-placeholder').style.display='flex';this.remove()">
+                        <div class="photo-placeholder" style="display:none">✦</div>
+                        <div class="photo-overlay"></div>
+                    </div>`).join('');
+
+                photosHTML = `
+                    <div class="gallery-section">
+                        <h3 class="section-heading">Gallery</h3>
+                        <div class="gallery-grid">${photoItems}</div>
+                        ${albumBtnHTML}
+                    </div>`;
+            } else {
+                photosHTML = `
+                    <div class="gallery-section">
+                        <h3 class="section-heading">Gallery</h3>
+                        <div class="empty-state">
+                            Photos will appear here once added to data.js
+                        </div>
+                        ${albumBtnHTML}
+                    </div>`;
+            }
+
+            section.innerHTML = `
+                <div class="event-header">
+                    <span class="event-tag">${event.date}</span>
+                    <h2 class="event-title">${event.title}</h2>
+                    <p class="event-desc">${event.description}</p>
+                </div>
+                ${filmsHTML}
+                ${photosHTML}
+            `;
+
+            eventsEl.appendChild(section);
+            revealObserver.observe(section);
+        });
+
+        // ── Event delegation for clicks ──────────────
+
+        document.getElementById('events').addEventListener('click', e => {
+            // Video card
+            const filmCard = e.target.closest('.film-card');
+            if (filmCard) {
+                const eventId = filmCard.dataset.event;
+                const vIdx    = parseInt(filmCard.dataset.vidx, 10);
+                const evData  = events.find(ev => ev.id === eventId);
+                if (!evData) return;
+                const v = evData.videos.map(v => ({ ...v, parsed: parseVideoUrl(v.url) }))
+                                        .filter(v => v.parsed)[vIdx];
+                if (v) openVideo(v.parsed, v.label);
+                return;
+            }
+
+            // Photo item
+            const photoItem = e.target.closest('.photo-item');
+            if (photoItem) {
+                const eventId = photoItem.dataset.event;
+                const pIdx    = parseInt(photoItem.dataset.pidx, 10);
+                const photos  = allPhotos[eventId];
+                if (photos && photos.length) openLightbox(photos, pIdx);
+                return;
+            }
+        });
+
+        // Keyboard support for cards
+        document.getElementById('events').addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.target.click();
+            }
+        });
+    });
+
+})();
