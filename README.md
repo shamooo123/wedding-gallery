@@ -38,7 +38,7 @@ To run this gallery locally on your machine:
    ```bash
    git clone [https://github.com/shamooo123/wedding-gallery.git](https://github.com/shamooo123/wedding-gallery.git)
 
-``
+
 
 2. **Navigate into the directory:**
 ```bash
