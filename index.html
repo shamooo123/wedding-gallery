@@ -1,42 +1,77 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sara & Shan - Wedding Celebration</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        serif: ['Playfair Display', 'Georgia', 'serif'],
-                        sans: ['Lato', 'Helvetica', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+    <title>Sara & Shan — Wedding Celebration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-[#FDFCF8] text-stone-800">
+<body>
 
-    <header class="min-h-[70vh] flex flex-col items-center justify-center bg-stone-900 text-white text-center px-4 relative overflow-hidden">
-        <div class="z-10 relative">
-            <p class="text-sm md:text-base font-light tracking-[0.3em] uppercase opacity-80 mb-6">The Wedding Of</p>
-            <h1 class="text-4xl md:text-7xl font-serif mb-6 italic">Sara Shehnaz Abbasi<br><span class="text-2xl md:text-4xl not-italic text-stone-400">&</span><br>Muhammed Shan Ahmed</h1>
-            <nav id="nav-links" class="mt-12 flex flex-wrap justify-center gap-6 text-sm md:text-base text-stone-300"></nav>
+    <!-- ░░ STICKY NAV ░░ -->
+    <nav id="site-nav">
+        <span class="nav-monogram">S <span>&</span> S</span>
+        <ul id="nav-links"></ul>
+    </nav>
+
+    <!-- ░░ HERO ░░ -->
+    <header id="hero">
+        <div class="hero-bg-grain"></div>
+        <div class="hero-content">
+            <p class="hero-eyebrow">The Wedding Of</p>
+            <h1 class="hero-title">
+                <em>Sara Shehnaz Abbasi</em>
+                <span class="hero-amp">&amp;</span>
+                <em>Muhammed Shan Ahmed</em>
+            </h1>
+            <div class="hero-divider"></div>
+            <p class="hero-date">January 2024</p>
+            <a href="#events" class="hero-scroll-cue" aria-label="Scroll down">
+                <span>↓</span>
+            </a>
         </div>
-        <div class="absolute inset-0 bg-black opacity-20"></div>
     </header>
 
-    <main id="events-container" class="max-w-6xl mx-auto px-4 py-8 space-y-12">
-        </main>
+    <!-- ░░ EVENTS ░░ -->
+    <main id="events"></main>
 
-    <footer class="bg-stone-900 text-stone-500 py-16 text-center text-sm mt-12">
-        <p class="tracking-widest uppercase text-xs">A gift for my sister</p>
-        <p class="mt-2 opacity-50">© 2024</p>
+    <!-- ░░ FOOTER ░░ -->
+    <footer>
+        <div class="footer-inner">
+            <p class="footer-monogram"><em>S &amp; S</em></p>
+            <p class="footer-gift">A gift of memories, with love</p>
+            <p class="footer-copy">© 2024</p>
+        </div>
     </footer>
+
+    <!-- ░░ LIGHTBOX ░░ -->
+    <div id="lightbox" aria-hidden="true">
+        <button id="lb-close" aria-label="Close">✕</button>
+        <button id="lb-prev" aria-label="Previous">‹</button>
+        <button id="lb-next" aria-label="Next">›</button>
+        <div id="lb-media-wrap">
+            <img id="lb-img" src="" alt="Wedding photo" />
+        </div>
+        <p id="lb-caption"></p>
+        <div id="lb-counter"></div>
+    </div>
+    <div id="lightbox-backdrop"></div>
+
+    <!-- ░░ VIDEO MODAL ░░ -->
+    <div id="video-modal" aria-hidden="true">
+        <div id="video-modal-inner">
+            <button id="vm-close" aria-label="Close video">✕</button>
+            <div id="vm-wrap">
+                <iframe id="vm-iframe" src="" allowfullscreen allow="autoplay; fullscreen"></iframe>
+                <video id="vm-video" controls playsinline></video>
+            </div>
+            <p id="vm-label"></p>
+        </div>
+    </div>
+    <div id="video-backdrop"></div>
 
     <script src="data.js"></script>
     <script src="script.js"></script>
