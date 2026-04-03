@@ -391,6 +391,22 @@ body {
     user-select: none;
 }
 
+/* ─── GALLERY CATEGORIES ──────────────────── */
+.gallery-category {
+    margin-bottom: 3.5rem;
+}
+.category-heading {
+    font-family: var(--ff-sans);
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--light);
+    padding-bottom: 0.5rem;
+}
+.gallery-category:last-child { margin-bottom: 0; }
+
 /* ─── ALBUM BUTTON ────────────────────────── */
 .album-btn-wrap {
     margin-top: 2.5rem;
