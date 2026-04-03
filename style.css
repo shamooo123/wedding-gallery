@@ -632,3 +632,85 @@ footer {
 ::-webkit-scrollbar-track { background: var(--cream); }
 ::-webkit-scrollbar-thumb { background: var(--light); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--champagne); }
+
+/* ─── PASSWORD GATE ──────────────────────── */
+#pw-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ink);
+    background-image: radial-gradient(ellipse at center, rgba(201,169,110,.08) 0%, transparent 65%);
+}
+.pw-inner {
+    text-align: center;
+    max-width: 340px;
+    width: 90%;
+}
+.pw-monogram {
+    font-family: var(--ff-serif);
+    font-size: 2.4rem;
+    color: var(--champagne);
+    letter-spacing: .15em;
+    margin-bottom: 1.5rem;
+}
+.pw-monogram em { font-style: italic; }
+.pw-prompt {
+    font-family: var(--ff-sans);
+    font-size: .8rem;
+    font-weight: 300;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.35);
+    margin-bottom: 2rem;
+}
+.pw-field-wrap {
+    display: flex;
+    border: 1px solid rgba(201,169,110,.3);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: border-color .3s;
+}
+.pw-field-wrap:focus-within {
+    border-color: var(--champagne);
+}
+#pw-input {
+    flex: 1;
+    padding: .9rem 1.2rem;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--cream);
+    font-family: var(--ff-sans);
+    font-size: .9rem;
+    font-weight: 300;
+    letter-spacing: .08em;
+}
+#pw-input::placeholder {
+    color: rgba(255,255,255,.2);
+}
+#pw-submit {
+    padding: .9rem 1.4rem;
+    background: transparent;
+    border: none;
+    border-left: 1px solid rgba(201,169,110,.2);
+    color: var(--champagne);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background .3s, color .3s;
+}
+#pw-submit:hover {
+    background: rgba(201,169,110,.12);
+    color: #fff;
+}
+.pw-error {
+    margin-top: 1rem;
+    font-family: var(--ff-sans);
+    font-size: .75rem;
+    font-weight: 300;
+    color: #c97a6e;
+    letter-spacing: .05em;
+    min-height: 1.2em;
+}
