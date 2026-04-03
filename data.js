@@ -4,6 +4,11 @@
 // ════════════════════════════════════════════════════
 
 const weddingData = {
+    // ── Simple password gate ─────────────────────────
+    // Change this to whatever you want. Case-insensitive.
+    // Set to "" or remove to disable the password gate.
+    password: "sara&shan",
+
     couple: {
         name1: "Sara Shehnaz Abbasi",
         name2: "Muhammed Shan Ahmed",
@@ -18,8 +23,8 @@ const weddingData = {
             description: "The beginning of their forever. The signing ceremony and exchange of vows.",
 
             videos: [
-                { label: "Wedding Film - Part 1", url: "https://youtu.be/cbupxKxRPmY" },
-                { label: "Wedding Film - Part 2", url: "https://youtu.be/CB5GKzRlL8o" },
+                { label: "Nikkah Trailer", url: "https://youtu.be/CB5GKzRlL8o" },
+                { label: "Nikkah Full Film", url: "https://youtu.be/YJwImmFsrRQ" },
             ],
 
             photoCategories: [
@@ -697,8 +702,8 @@ const weddingData = {
             date:        "January 14, 2024",
             description: "The grand celebration. The reception, the feast, and the first chapter.",
             videos: [
-                 { label: "Highlights", url: "https://youtu.be/7g5fs2yoBxI" },
-                 { label: "Ceremony Video", url: "https://youtu.be/YJwImmFsrRQ" }
+                 { label: "Wedding Trailer", url: "https://youtu.be/cbupxKxRPmY" },
+                 { label: "Wedding Full Film", url: "https://youtu.be/7g5fs2yoBxI" }
             ],
             photoCategories: [
                 {
