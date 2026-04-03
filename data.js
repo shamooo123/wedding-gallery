@@ -57,24 +57,58 @@ const weddingData = {
             date:        "January 10, 2024",
             description: "The beginning of their forever. The signing ceremony and exchange of vows.",
 
-            // Paste your Unlisted YouTube URLs here
             videos: [
                 { label: "Wedding Film - Part 1", url: "https://youtu.be/cbupxKxRPmY" },
                 { label: "Wedding Film - Part 2", url: "https://youtu.be/CB5GKzRlL8o" },
-                { label: "Highlights", url: "https://youtu.be/7g5fs2yoBxI" },
-                { label: "Ceremony Video", url: "https://youtu.be/YJwImmFsrRQ" }
             ],
 
-            // Point to the local folder you created
-            photos: [
-                "photos/nikah-1.jpg",
-                "photos/nikah-2.jpg",
-                "photos/nikah-3.jpg"
+            // ⚠️ NEW STRUCTURE: Group photos by your folders
+            photoCategories: [
+                {
+                    title: "Editor's Cut",
+                    // Put the full file paths here
+                    photos: [
+                        "Photo/Nikkah/Nikkah Editor's Cut Compressed/img1.jpg",
+                        "Photo/Nikkah/Nikkah Editor's Cut Compressed/img2.jpg"
+                    ]
+                },
+                {
+                    title: "Gallery 1",
+                    photos: [
+                        "Photo/Nikkah/Nikkah Photo 1 Compressed/img1.jpg",
+                        "Photo/Nikkah/Nikkah Photo 1 Compressed/img2.jpg"
+                    ]
+                },
+                {
+                    title: "Gallery 2",
+                    photos: [
+                        // ... your paths for Photo 2 Compressed
+                    ]
+                }
             ],
 
-            // Link to the massive, uncompressed Google Drive folder for guests who want everything
-            albumLink: "https://drive.google.com/drive/folders/YOUR_GOOGLE_DRIVE_ID_HERE"  
+            albumLink: "https://drive.google.com/drive/folders/YOUR_GOOGLE_DRIVE_ID_HERE"
         },
-        // ... repeat for Mehndi, Shaadi, etc.
+        
+        {
+            id:          "wedding",
+            title:       "The Wedding",
+            date:        "January 14, 2024",
+            description: "The grand celebration. The reception, the feast, and the first chapter.",
+            videos: [
+                 { label: "Highlights", url: "https://youtu.be/7g5fs2yoBxI" },
+                 { label: "Ceremony Video", url: "https://youtu.be/YJwImmFsrRQ" }
+            ],
+            photoCategories: [
+                {
+                    title: "Editor's Cut",
+                    photos: [
+                        "Photo/Wedding/Wedding Editor's Cut Compressed/img1.jpg",
+                    ]
+                },
+                // ... add Gallery 1 and Gallery 2 here
+            ],
+            albumLink: ""
+        }
     ]
 };
