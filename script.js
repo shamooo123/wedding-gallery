@@ -7,13 +7,9 @@
 
     // ── VIDEO URL HELPERS ────────────────────────────
 
-    /**
-     * Detects video type and returns { type, embedUrl, thumbUrl }
-     */
     function parseVideoUrl(rawUrl) {
         if (!rawUrl || rawUrl.includes('PASTE_YOUR_URL')) return null;
 
-        // YouTube
         const ytMatch = rawUrl.match(
             /(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/
         );
@@ -25,17 +21,15 @@
             };
         }
 
-        // Vimeo
         const vimeoMatch = rawUrl.match(/vimeo\.com\/(\d+)/);
         if (vimeoMatch) {
             return {
                 type: 'iframe',
                 embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`,
-                thumbUrl: null  // fetched async below if needed
+                thumbUrl: null
             };
         }
 
-        // Google Drive
         const driveMatch = rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
         if (driveMatch) {
             return {
@@ -45,12 +39,10 @@
             };
         }
 
-        // Direct MP4 / video file
         if (/\.(mp4|webm|mov|m4v)(\?|$)/i.test(rawUrl)) {
             return { type: 'video', embedUrl: rawUrl, thumbUrl: null };
         }
 
-        // Unknown — try as iframe
         return { type: 'iframe', embedUrl: rawUrl, thumbUrl: null };
     }
 
@@ -83,7 +75,6 @@
         videoModal.classList.add('active');
         videoModal.setAttribute('aria-hidden', 'false');
 
-        // Backdrop fade-in
         videoBackdrop.style.display = 'block';
         requestAnimationFrame(() => videoBackdrop.classList.add('active'));
 
@@ -115,7 +106,7 @@
     const lbPrev    = document.getElementById('lb-prev');
     const lbNext    = document.getElementById('lb-next');
 
-    let lbPhotos = [];  // flat array of { src, caption }
+    let lbPhotos = [];
     let lbIndex  = 0;
 
     function openLightbox(photos, startIndex) {
@@ -137,7 +128,6 @@
         lbCaption.textContent = p.caption || '';
         lbCounter.textContent = `${lbIndex + 1} / ${lbPhotos.length}`;
 
-        // Hide arrows if only one photo
         lbPrev.style.display = lbPhotos.length > 1 ? '' : 'none';
         lbNext.style.display = lbPhotos.length > 1 ? '' : 'none';
     }
@@ -155,7 +145,6 @@
     lbPrev.addEventListener('click', () => showLbPhoto(lbIndex - 1));
     lbNext.addEventListener('click', () => showLbPhoto(lbIndex + 1));
 
-    // Keyboard nav
     document.addEventListener('keydown', e => {
         if (lightbox.classList.contains('active')) {
             if (e.key === 'ArrowLeft')  showLbPhoto(lbIndex - 1);
@@ -167,7 +156,6 @@
         }
     });
 
-    // Touch swipe for lightbox
     let touchStartX = 0;
     lightbox.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
     lightbox.addEventListener('touchend',   e => {
@@ -226,19 +214,16 @@
                 .map(v => ({ ...v, parsed: parseVideoUrl(v.url) }))
                 .filter(v => v.parsed);
 
-            // Build valid photos
-            const validPhotos = (event.photos || []).filter(p => p && !p.includes('your-github'));
+            // Initialize lightbox array for this event
+            allPhotos[event.id] = [];
 
-            // Store for lightbox
-            allPhotos[event.id] = validPhotos.map(p => ({ src: p, caption: event.title }));
-
-            // ── Section HTML ─────────────────────────
+            // ── Section element ──────────────────────
             const section = document.createElement('section');
             section.className = 'event-section';
             section.id        = event.id;
             section.style.cssText = `transition-delay: ${eIdx * 0.08}s`;
 
-            // Films
+            // Films HTML
             let filmsHTML = '';
             if (validVideos.length > 0) {
                 const cards = validVideos.map((v, i) => {
@@ -282,7 +267,7 @@
                     </div>`;
             }
 
-            // Photos
+            // Photos HTML
             let photosHTML = '';
             let albumBtnHTML = event.albumLink
                 ? `<div class="album-btn-wrap">
@@ -294,9 +279,6 @@
                        </a>
                    </div>` : '';
 
-            // Initialize lightbox array for this event
-            allPhotos[event.id] = [];
-
             if (event.photoCategories && event.photoCategories.length > 0) {
                 let categoryBlocks = '';
                 
@@ -305,7 +287,6 @@
                     if (validCatPhotos.length === 0) return;
 
                     const photoItems = validCatPhotos.map(p => {
-                        // Track the index for the global lightbox
                         const pIdx = allPhotos[event.id].length;
                         allPhotos[event.id].push({ src: p, caption: `${event.title} — ${cat.title}` });
 
@@ -348,9 +329,24 @@
                     </div>`;
             }
 
+            // ── Assemble and append the section ──────
+            section.innerHTML = `
+                <div class="event-header">
+                    <h2 class="event-title">${event.title}</h2>
+                    <p class="event-date">${event.date}</p>
+                    <p class="event-desc">${event.description}</p>
+                </div>
+                ${filmsHTML}
+                ${photosHTML}
+            `;
+
+            eventsEl.appendChild(section);
+            revealObserver.observe(section);
+        });
+
         // ── Event delegation for clicks ──────────────
 
-        document.getElementById('events').addEventListener('click', e => {
+        eventsEl.addEventListener('click', e => {
             // Video card
             const filmCard = e.target.closest('.film-card');
             if (filmCard) {
@@ -376,7 +372,7 @@
         });
 
         // Keyboard support for cards
-        document.getElementById('events').addEventListener('keydown', e => {
+        eventsEl.addEventListener('keydown', e => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 e.target.click();
