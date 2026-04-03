@@ -184,6 +184,61 @@
     // ── BUILD PAGE ───────────────────────────────────
 
     document.addEventListener('DOMContentLoaded', () => {
+
+        // ── PASSWORD GATE ────────────────────────────
+        const pw       = (weddingData.password || '').trim();
+        const pwGate   = document.getElementById('pw-gate');
+        const pwInput  = document.getElementById('pw-input');
+        const pwSubmit = document.getElementById('pw-submit');
+        const pwError  = document.getElementById('pw-error');
+        const STORAGE_KEY = 'ss_gallery_auth';
+
+        function isAuthed() {
+            if (!pw) return true; // no password set
+            return sessionStorage.getItem(STORAGE_KEY) === 'yes';
+        }
+
+        function showSite() {
+            pwGate.style.display = 'none';
+            document.getElementById('site-nav').style.display = '';
+            document.getElementById('hero').style.display = '';
+            document.getElementById('events').style.display = '';
+            document.querySelector('footer').style.display = '';
+        }
+
+        function showGate() {
+            pwGate.style.display = 'flex';
+            document.getElementById('site-nav').style.display = 'none';
+            document.getElementById('hero').style.display = 'none';
+            document.getElementById('events').style.display = 'none';
+            document.querySelector('footer').style.display = 'none';
+            setTimeout(() => pwInput.focus(), 100);
+        }
+
+        function tryPassword() {
+            const val = pwInput.value.trim();
+            if (val.toLowerCase() === pw.toLowerCase()) {
+                sessionStorage.setItem(STORAGE_KEY, 'yes');
+                showSite();
+            } else {
+                pwError.textContent = 'Incorrect password';
+                pwInput.value = '';
+                pwInput.focus();
+            }
+        }
+
+        if (pw && !isAuthed()) {
+            showGate();
+        }
+
+        if (pwSubmit) pwSubmit.addEventListener('click', tryPassword);
+        if (pwInput) pwInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') tryPassword();
+            pwError.textContent = '';
+        });
+
+        // ── BUILD GALLERY ────────────────────────────
+
         const { couple, events } = weddingData;
         const navLinks = document.getElementById('nav-links');
         const eventsEl = document.getElementById('events');
