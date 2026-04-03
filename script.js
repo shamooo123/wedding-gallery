@@ -294,49 +294,59 @@
                        </a>
                    </div>` : '';
 
-            if (validPhotos.length > 0) {
-                const photoItems = validPhotos.map((p, i) => `
-                    <div class="photo-item" 
-                         data-event="${event.id}"
-                         data-pidx="${i}"
-                         role="button" tabindex="0"
-                         aria-label="Open photo ${i + 1}">
-                        <img src="${p}" alt="Wedding photo ${i+1}" loading="lazy"
-                             onerror="this.closest('.photo-item').querySelector('.photo-placeholder').style.display='flex';this.remove()">
-                        <div class="photo-placeholder" style="display:none">✦</div>
-                        <div class="photo-overlay"></div>
-                    </div>`).join('');
+            // Initialize lightbox array for this event
+            allPhotos[event.id] = [];
 
+            if (event.photoCategories && event.photoCategories.length > 0) {
+                let categoryBlocks = '';
+                
+                event.photoCategories.forEach(cat => {
+                    const validCatPhotos = (cat.photos || []).filter(p => p && !p.includes('your-github'));
+                    if (validCatPhotos.length === 0) return;
+
+                    const photoItems = validCatPhotos.map(p => {
+                        // Track the index for the global lightbox
+                        const pIdx = allPhotos[event.id].length;
+                        allPhotos[event.id].push({ src: p, caption: `${event.title} — ${cat.title}` });
+
+                        return `
+                            <div class="photo-item" 
+                                 data-event="${event.id}"
+                                 data-pidx="${pIdx}"
+                                 role="button" tabindex="0">
+                                <img src="${p}" loading="lazy"
+                                     onerror="this.closest('.photo-item').querySelector('.photo-placeholder').style.display='flex';this.remove()">
+                                <div class="photo-placeholder" style="display:none">✦</div>
+                                <div class="photo-overlay"></div>
+                            </div>`;
+                    }).join('');
+
+                    categoryBlocks += `
+                        <div class="gallery-category">
+                            <h4 class="category-heading">${cat.title}</h4>
+                            <div class="gallery-grid">${photoItems}</div>
+                        </div>`;
+                });
+
+                if (categoryBlocks) {
+                    photosHTML = `
+                        <div class="gallery-section">
+                            <h3 class="section-heading">Gallery</h3>
+                            ${categoryBlocks}
+                            ${albumBtnHTML}
+                        </div>`;
+                }
+            }
+
+            // Fallback empty state
+            if (!photosHTML) {
                 photosHTML = `
                     <div class="gallery-section">
                         <h3 class="section-heading">Gallery</h3>
-                        <div class="gallery-grid">${photoItems}</div>
-                        ${albumBtnHTML}
-                    </div>`;
-            } else {
-                photosHTML = `
-                    <div class="gallery-section">
-                        <h3 class="section-heading">Gallery</h3>
-                        <div class="empty-state">
-                            Photos will appear here once added to data.js
-                        </div>
+                        <div class="empty-state">Photos will appear here once added to data.js</div>
                         ${albumBtnHTML}
                     </div>`;
             }
-
-            section.innerHTML = `
-                <div class="event-header">
-                    <span class="event-tag">${event.date}</span>
-                    <h2 class="event-title">${event.title}</h2>
-                    <p class="event-desc">${event.description}</p>
-                </div>
-                ${filmsHTML}
-                ${photosHTML}
-            `;
-
-            eventsEl.appendChild(section);
-            revealObserver.observe(section);
-        });
 
         // ── Event delegation for clicks ──────────────
 
