@@ -51,70 +51,30 @@ const weddingData = {
     },
 
     events: [
-        // ── EVENT 1: NIKAH ────────────────────────────
         {
             id:          "nikah",
             title:       "The Nikah",
             date:        "January 10, 2024",
             description: "The beginning of their forever. The signing ceremony and exchange of vows.",
 
-            // Paste video URLs here (YouTube, Google Drive, Vimeo, or direct MP4)
+            // Paste your Unlisted YouTube URLs here
             videos: [
-                // { label: "Cinematic Trailer", url: "PASTE_YOUR_URL_HERE" },
-                // { label: "Full Ceremony", url: "PASTE_YOUR_URL_HERE" },
+                { label: "Wedding Film - Part 1", url: "https://youtu.be/cbupxKxRPmY" },
+                { label: "Wedding Film - Part 2", url: "https://youtu.be/CB5GKzRlL8o" },
+                { label: "Highlights", url: "https://youtu.be/7g5fs2yoBxI" },
+                { label: "Ceremony Video", url: "https://youtu.be/YJwImmFsrRQ" }
             ],
 
-            // Paste photo URLs here (see instructions above)
+            // Point to the local folder you created
             photos: [
-                // "https://your-github-raw-url.jpg",
-                // "photo-in-same-folder.jpg",
+                "photos/nikah-1.jpg",
+                "photos/nikah-2.jpg",
+                "photos/nikah-3.jpg"
             ],
 
-            // Link to full album (Google Drive folder, Google Photos, etc.)
-            albumLink: ""  // e.g. "https://drive.google.com/drive/folders/YOUR_ID"
+            // Link to the massive, uncompressed Google Drive folder for guests who want everything
+            albumLink: "https://drive.google.com/drive/folders/YOUR_GOOGLE_DRIVE_ID_HERE"  
         },
-
-        // ── EVENT 2: MEHNDI ───────────────────────────
-        {
-            id:          "mehndi",
-            title:       "The Mehndi",
-            date:        "January 12, 2024",
-            description: "A night of colour, dance, and henna. Surrounded by those they love most.",
-
-            videos: [
-                // { label: "Mehndi Highlights", url: "PASTE_YOUR_URL_HERE" },
-            ],
-
-            photos: [
-                // "mehndi1.jpg",
-                // "mehndi2.jpg",
-            ],
-
-            albumLink: ""
-        },
-
-        // ── EVENT 3: SHAADI ───────────────────────────
-        {
-            id:          "shaadi",
-            title:       "Shaadi & Walima",
-            date:        "January 14, 2024",
-            description: "The grand celebration. The reception, the feast, and the first chapter of their life together.",
-
-            videos: [
-                // { label: "Wedding Film", url: "PASTE_YOUR_URL_HERE" },
-                // { label: "Reception Highlights", url: "PASTE_YOUR_URL_HERE" },
-            ],
-
-            photos: [
-                // "shaadi1.jpg",
-                // "shaadi2.jpg",
-            ],
-
-            albumLink: ""
-        },
-
-        // ── ADD MORE EVENTS ───────────────────────────
-        // To add a new event (e.g. Baraat), copy one of the blocks above
-        // and paste it here, editing the details.
+        // ... repeat for Mehndi, Shaadi, etc.
     ]
 };
