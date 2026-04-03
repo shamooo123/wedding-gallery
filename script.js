@@ -179,7 +179,7 @@
                 revealObserver.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.07 });
+    }, { threshold: 0.02, rootMargin: '50px' });
 
     // ── BUILD PAGE ───────────────────────────────────
 
@@ -199,6 +199,9 @@
 
         // Track all photos across events for global lightbox
         const allPhotos = {};
+
+        // Store category data for lazy rendering
+        const categoryData = {};
 
         events.forEach((event, eIdx) => {
             // Nav link
@@ -221,7 +224,6 @@
             const section = document.createElement('section');
             section.className = 'event-section';
             section.id        = event.id;
-            section.style.cssText = `transition-delay: ${eIdx * 0.08}s`;
 
             // Films HTML
             let filmsHTML = '';
@@ -257,24 +259,13 @@
                         <h3 class="section-heading">Films</h3>
                         <div class="films-grid">${cards}</div>
                     </div>`;
-            } else {
-                filmsHTML = `
-                    <div class="films-block">
-                        <h3 class="section-heading">Films</h3>
-                        <div class="empty-state">
-                            Videos will appear here once added to data.js
-                        </div>
-                    </div>`;
             }
 
-            // Photos HTML
+            // Photos — build collapsible category headers only (no photo DOM yet)
             let photosHTML = '';
             let albumBtnHTML = event.albumLink
                 ? `<div class="album-btn-wrap">
                        <a href="${event.albumLink}" target="_blank" rel="noopener" class="album-btn">
-                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                               <path d="M4 16l4-4 4 4 4-8 4 8M3 3h18v14a2 2 0 01-2 2H5a2 2 0 01-2-2V3z"/>
-                           </svg>
                            View Full Album
                        </a>
                    </div>` : '';
@@ -282,30 +273,30 @@
             if (event.photoCategories && event.photoCategories.length > 0) {
                 let categoryBlocks = '';
                 
-                event.photoCategories.forEach(cat => {
+                event.photoCategories.forEach((cat, cIdx) => {
                     const validCatPhotos = (cat.photos || []).filter(p => p && !p.includes('your-github'));
                     if (validCatPhotos.length === 0) return;
 
-                    const photoItems = validCatPhotos.map(p => {
-                        const pIdx = allPhotos[event.id].length;
-                        allPhotos[event.id].push({ src: p, caption: `${event.title} — ${cat.title}` });
+                    const catKey = `${event.id}_cat_${cIdx}`;
 
-                        return `
-                            <div class="photo-item" 
-                                 data-event="${event.id}"
-                                 data-pidx="${pIdx}"
-                                 role="button" tabindex="0">
-                                <img src="${p}" loading="lazy"
-                                     onerror="this.closest('.photo-item').querySelector('.photo-placeholder').style.display='flex';this.remove()">
-                                <div class="photo-placeholder" style="display:none">✦</div>
-                                <div class="photo-overlay"></div>
-                            </div>`;
-                    }).join('');
+                    // Store photo data for lazy rendering
+                    categoryData[catKey] = {
+                        eventId: event.id,
+                        catTitle: cat.title,
+                        photos: validCatPhotos,
+                        rendered: false
+                    };
 
                     categoryBlocks += `
-                        <div class="gallery-category">
-                            <h4 class="category-heading">${cat.title}</h4>
-                            <div class="gallery-grid">${photoItems}</div>
+                        <div class="gallery-category" data-catkey="${catKey}">
+                            <div class="category-toggle" role="button" tabindex="0" aria-expanded="false">
+                                <h4 class="category-heading">${cat.title}</h4>
+                                <span class="category-meta">${validCatPhotos.length} photos</span>
+                                <span class="category-arrow">›</span>
+                            </div>
+                            <div class="gallery-grid-wrap" style="display:none;">
+                                <div class="gallery-grid"></div>
+                            </div>
                         </div>`;
                 });
 
@@ -320,12 +311,11 @@
             }
 
             // Fallback empty state
-            if (!photosHTML) {
+            if (!photosHTML && !filmsHTML) {
                 photosHTML = `
                     <div class="gallery-section">
                         <h3 class="section-heading">Gallery</h3>
                         <div class="empty-state">Photos will appear here once added to data.js</div>
-                        ${albumBtnHTML}
                     </div>`;
             }
 
@@ -344,9 +334,65 @@
             revealObserver.observe(section);
         });
 
-        // ── Event delegation for clicks ──────────────
+        // ── Lazy-render photos when a category is toggled open ──
+
+        function renderCategory(catKey, gridEl) {
+            const data = categoryData[catKey];
+            if (!data || data.rendered) return;
+
+            // Build photo items and track for lightbox
+            // First, compute the starting index for this category's photos
+            const startIdx = allPhotos[data.eventId].length;
+
+            data.photos.forEach(p => {
+                allPhotos[data.eventId].push({ src: p, caption: `${data.catTitle}` });
+            });
+
+            const html = data.photos.map((p, i) => {
+                const pIdx = startIdx + i;
+                return `
+                    <div class="photo-item" 
+                         data-event="${data.eventId}"
+                         data-pidx="${pIdx}"
+                         role="button" tabindex="0">
+                        <img src="${p}" loading="lazy"
+                             onerror="this.closest('.photo-item').querySelector('.photo-placeholder').style.display='flex';this.remove()">
+                        <div class="photo-placeholder" style="display:none">✦</div>
+                        <div class="photo-overlay"></div>
+                    </div>`;
+            }).join('');
+
+            gridEl.innerHTML = html;
+            data.rendered = true;
+        }
+
+        // ── Category toggle click handler ────────────
 
         eventsEl.addEventListener('click', e => {
+            // Category toggle
+            const toggle = e.target.closest('.category-toggle');
+            if (toggle) {
+                const category = toggle.closest('.gallery-category');
+                const wrap = category.querySelector('.gallery-grid-wrap');
+                const grid = category.querySelector('.gallery-grid');
+                const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+
+                if (isOpen) {
+                    wrap.style.display = 'none';
+                    toggle.setAttribute('aria-expanded', 'false');
+                    category.classList.remove('expanded');
+                } else {
+                    // Lazy render on first open
+                    const catKey = category.dataset.catkey;
+                    renderCategory(catKey, grid);
+
+                    wrap.style.display = 'block';
+                    toggle.setAttribute('aria-expanded', 'true');
+                    category.classList.add('expanded');
+                }
+                return;
+            }
+
             // Video card
             const filmCard = e.target.closest('.film-card');
             if (filmCard) {
@@ -371,7 +417,7 @@
             }
         });
 
-        // Keyboard support for cards
+        // Keyboard support
         eventsEl.addEventListener('keydown', e => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
