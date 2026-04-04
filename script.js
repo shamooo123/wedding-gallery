@@ -374,6 +374,25 @@
                     </div>`;
             }
 
+            // ── Section lock overlay (for women-only etc) ──
+            const secPw = (event.sectionPassword || '').trim();
+            let lockHTML = '';
+            if (secPw) {
+                lockHTML = `
+                    <div class="section-lock" data-event-lock="${event.id}">
+                        <div class="section-lock-inner">
+                            <div class="section-lock-icon">✦</div>
+                            <p class="section-lock-title">Women Only</p>
+                            <p class="section-lock-desc">This section is password protected</p>
+                            <div class="pw-field-wrap section-lock-field">
+                                <input type="password" class="section-pw-input" placeholder="Password" autocomplete="off" />
+                                <button class="section-pw-btn" aria-label="Unlock">→</button>
+                            </div>
+                            <p class="section-pw-error pw-error"></p>
+                        </div>
+                    </div>`;
+            }
+
             // ── Assemble and append the section ──────
             section.innerHTML = `
                 <div class="event-header">
@@ -381,9 +400,20 @@
                     <p class="event-date">${event.date}</p>
                     <p class="event-desc">${event.description}</p>
                 </div>
-                ${filmsHTML}
-                ${photosHTML}
+                ${lockHTML}
+                <div class="event-content" ${secPw ? 'style="display:none"' : ''}>
+                    ${filmsHTML}
+                    ${photosHTML}
+                </div>
             `;
+
+            // Check if already unlocked this session
+            if (secPw && sessionStorage.getItem(`ss_section_${event.id}`) === 'yes') {
+                const lock = section.querySelector('.section-lock');
+                const content = section.querySelector('.event-content');
+                if (lock) lock.style.display = 'none';
+                if (content) content.style.display = '';
+            }
 
             eventsEl.appendChild(section);
             revealObserver.observe(section);
@@ -420,6 +450,51 @@
             gridEl.innerHTML = html;
             data.rendered = true;
         }
+
+        // ── Section lock handlers ─────────────────
+
+        function trySectionUnlock(lockEl) {
+            const eventId = lockEl.dataset.eventLock;
+            const evData  = events.find(ev => ev.id === eventId);
+            if (!evData) return;
+
+            const input = lockEl.querySelector('.section-pw-input');
+            const error = lockEl.querySelector('.section-pw-error');
+            const val   = input.value.trim();
+
+            if (val.toLowerCase() === evData.sectionPassword.toLowerCase()) {
+                sessionStorage.setItem(`ss_section_${eventId}`, 'yes');
+                lockEl.style.display = 'none';
+                lockEl.closest('.event-section').querySelector('.event-content').style.display = '';
+            } else {
+                error.textContent = 'Incorrect password';
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        // Delegated click for section lock buttons
+        eventsEl.addEventListener('click', e => {
+            const lockBtn = e.target.closest('.section-pw-btn');
+            if (lockBtn) {
+                const lockEl = lockBtn.closest('.section-lock');
+                trySectionUnlock(lockEl);
+                return;
+            }
+        });
+
+        // Enter key on section password inputs
+        eventsEl.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && e.target.classList.contains('section-pw-input')) {
+                const lockEl = e.target.closest('.section-lock');
+                trySectionUnlock(lockEl);
+                return;
+            }
+            if (e.target.classList.contains('section-pw-input') && e.key !== 'Enter') {
+                const error = e.target.closest('.section-lock').querySelector('.section-pw-error');
+                if (error) error.textContent = '';
+            }
+        });
 
         // ── Category toggle click handler ────────────
 

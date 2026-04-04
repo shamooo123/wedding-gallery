@@ -633,6 +633,75 @@ footer {
 ::-webkit-scrollbar-thumb { background: var(--light); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--champagne); }
 
+/* ─── SECTION LOCK (women-only etc) ──────── */
+.section-lock {
+    position: relative;
+    margin: 0 auto;
+    max-width: 380px;
+    text-align: center;
+    padding: 4rem 1.5rem;
+    border: 1px solid var(--light);
+    border-radius: 6px;
+    background: linear-gradient(135deg, rgba(243,237,227,.6) 0%, rgba(250,247,242,.9) 100%);
+}
+.section-lock-icon {
+    font-family: var(--ff-serif);
+    font-size: 2rem;
+    color: var(--champagne);
+    margin-bottom: 1rem;
+    opacity: .6;
+}
+.section-lock-title {
+    font-family: var(--ff-serif);
+    font-size: 1.6rem;
+    font-style: italic;
+    color: var(--ink);
+    margin-bottom: .5rem;
+}
+.section-lock-desc {
+    font-family: var(--ff-sans);
+    font-size: .75rem;
+    font-weight: 300;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 2rem;
+}
+.section-lock-field {
+    max-width: 280px;
+    margin: 0 auto;
+    border-color: var(--light);
+}
+.section-lock-field input {
+    flex: 1;
+    padding: .8rem 1rem;
+    background: rgba(255,255,255,.6);
+    border: none;
+    outline: none;
+    color: var(--ink);
+    font-family: var(--ff-sans);
+    font-size: .85rem;
+    font-weight: 300;
+    letter-spacing: .06em;
+}
+.section-lock-field input::placeholder {
+    color: var(--muted);
+    opacity: .5;
+}
+.section-lock-field button {
+    padding: .8rem 1.2rem;
+    background: transparent;
+    border: none;
+    border-left: 1px solid var(--light);
+    color: var(--gold);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background .3s;
+}
+.section-lock-field button:hover {
+    background: rgba(201,169,110,.08);
+}
+
 /* ─── PASSWORD GATE ──────────────────────── */
 #pw-gate {
     position: fixed;
